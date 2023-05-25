@@ -1,10 +1,6 @@
+"""Demonstrates a simple implementation of an 'event' listener that triggers 
+a publication via mqtt"""
 import paho.mqtt.client as paho
-
-
-
-
-
-# client.publish("lot/sensor", "Hello from Python")
 
 
 class Sensor:
@@ -14,19 +10,22 @@ class Sensor:
         self.topic = config['topic']
         self.broker = config['broker']
         self.port = config['port']
+        
+        # initialise a paho client and bind it to the object (has-a)
         self.client = paho.Client()
         self.client.connect(self.broker,
                             self.port)
 
 
     def on_detection(self, message):
+        """The method that is triggered when a detection occurs"""
         self.client.publish(self.topic, message)
 
     def start_sensing(self):
+        """a blocking event loop that waits for detection events, in this case Enter presses"""
         while True:
-            reply = input("Is there a car?")
-            if reply == 'y':
-                self.on_detection("Car, I saw a car!!")
+            input("Press Enter when 🚗 detected!")
+            self.on_detection("Car detection took place")
 
 
 
