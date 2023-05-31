@@ -14,7 +14,7 @@ class Sensor(mqtt_device.MqttDevice):
         case Enter presses"""
         while True:
             input("Press Enter when 🚗 detected!")
-            self.on_detection("Car detection took place")
+            self.on_detection("Car-Detected")
 
 
 if __name__ == '__main__':

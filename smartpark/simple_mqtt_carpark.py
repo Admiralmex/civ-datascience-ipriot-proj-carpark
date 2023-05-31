@@ -1,4 +1,5 @@
 import paho.mqtt.client as paho
+from paho.mqtt.client import MQTTMessage
 import mqtt_device
 
 class Carpark(mqtt_device.MqttDevice):
@@ -24,8 +25,15 @@ class Carpark(mqtt_device.MqttDevice):
         self.total_cars -= 1
         # TODO: Publish to MQTT
 
-    def on_message(self, client, userdata, msg):
-        print(f'Received {msg.payload.decode()}')
+    def on_message(self, client, userdata, msg: MQTTMessage):
+        # print(f'Received {msg.payload.decode()}')
+        print(msg.topic)
+        topic = msg.topic.strip().split('/')[-1]
+        print(topic)
+        if topic == 'entry':
+            self.on_car_entry()
+        else:
+            self.on_car_exit()
 
 
 if __name__ == '__main__':
