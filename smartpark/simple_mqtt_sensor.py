@@ -18,7 +18,7 @@ class Sensor(mqtt_device.MqttDevice):
 
 
 if __name__ == '__main__':
-    config = {'name': 'super sensor',
+    config = {'name': 'sensor',
               'location': 'L306',
               'topic-root': "lot",
               'broker': 'localhost',
