@@ -28,5 +28,6 @@ if __name__ == '__main__':
      'port': 1883,
      'topic-qualifier': 'na'
      }
+    # TODO: Read config from file
     display = Display(config)
 

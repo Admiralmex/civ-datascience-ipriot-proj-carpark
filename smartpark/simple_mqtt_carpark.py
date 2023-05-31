@@ -59,5 +59,6 @@ if __name__ == '__main__':
               'topic-qualifier': 'entry',
               'is_stuff': False
               }
+    # TODO: Read config from file
     car_park = CarPark(config)
     print("Carpark initialized")

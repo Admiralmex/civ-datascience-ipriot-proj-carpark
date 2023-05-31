@@ -30,16 +30,11 @@ if __name__ == '__main__':
               'port': 1883,
               'topic-qualifier': 'entry'
               }
-    config2 = {'name': 'sensor',
-               'location': 'L306',
-               'topic-root': "lot",
-               'broker': 'localhost',
-               'port': 1883,
-               'topic-qualifier': 'exit'
-               }
+    # TODO: Read config from file
+
     sensor1 = Sensor(config1)
-    sensor2 = Sensor(config2)
+
 
     print("Sensor initialized")
     sensor1.start_sensing()
-    sensor2.start_sensing()
+
