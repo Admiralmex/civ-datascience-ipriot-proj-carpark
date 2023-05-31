@@ -7,25 +7,39 @@ class Sensor(mqtt_device.MqttDevice):
 
     def on_detection(self, message):
         """Triggered when a detection occurs"""
-        self.client.publish(self.topic, message)
+        self.client.publish('sensor', message)
 
     def start_sensing(self):
         """ A blocking event loop that waits for detection events, in this
         case Enter presses"""
         while True:
-            input("Press Enter when 🚗 detected!")
-            self.on_detection("Car-Detected")
+            print("Press E when 🚗 entered!")
+            print("Press X when 🚖 exited!")
+            detection = input("E or X> ").upper()
+            if detection == 'E':
+                self.on_detection("entered")
+            else:
+                self.on_detection("exited")
 
 
 if __name__ == '__main__':
-    config = {'name': 'sensor',
+    config1 = {'name': 'sensor',
               'location': 'L306',
               'topic-root': "lot",
               'broker': 'localhost',
               'port': 1883,
               'topic-qualifier': 'entry'
               }
+    config2 = {'name': 'sensor',
+               'location': 'L306',
+               'topic-root': "lot",
+               'broker': 'localhost',
+               'port': 1883,
+               'topic-qualifier': 'exit'
+               }
+    sensor1 = Sensor(config1)
+    sensor2 = Sensor(config2)
 
-    sensor = Sensor(config)
     print("Sensor initialized")
-    sensor.start_sensing()
+    sensor1.start_sensing()
+    sensor2.start_sensing()

@@ -12,7 +12,7 @@ class CarPark(mqtt_device.MqttDevice):
         self.total_spaces = config['total-spaces']
         self.total_cars = config['total-cars']
         self.client.on_message = self.on_message
-        self.client.subscribe('+/+/+/+')
+        self.client.subscribe('sensor')
         self.client.loop_forever()
 
     @property
@@ -25,7 +25,10 @@ class CarPark(mqtt_device.MqttDevice):
         print(f"TIME: {readable_time}, " +
               f"SPACES: {self.available_spaces}, " +
               f"TEMPC: 42") # TODO: Temperature
-        # TODO: Publish to MQTT
+        message = (f"TIME: {readable_time}, " +
+              f"SPACES: {self.available_spaces}, " +
+              f"TEMPC: 42")
+        self.client.publish('display', message)
 
     def on_car_entry(self):
         self.total_cars += 1
@@ -38,14 +41,11 @@ class CarPark(mqtt_device.MqttDevice):
         self._publish_event()
 
     def on_message(self, client, userdata, msg: MQTTMessage):
-        # print(f'Received {msg.payload.decode()}')
-        print(msg.topic)
-        topic = msg.topic.strip().split('/')[-1]
-        print(topic)
-        if topic == 'entry':
-            self.on_car_entry()
-        else:
+        payload = msg.payload.decode()
+        if 'exit' in payload:
             self.on_car_exit()
+        else:
+            self.on_car_entry()
 
 
 if __name__ == '__main__':
