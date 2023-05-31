@@ -4,7 +4,7 @@ import mqtt_device
 from datetime import datetime
 
 
-class Carpark(mqtt_device.MqttDevice):
+class CarPark(mqtt_device.MqttDevice):
     """Creates a carpark object to store the state of cars in the lot"""
 
     def __init__(self, config):
@@ -56,8 +56,8 @@ if __name__ == '__main__':
               'topic-root': "lot",
               'broker': 'localhost',
               'port': 1883,
-              'topic-qualifier': 'entry'
+              'topic-qualifier': 'entry',
+              'is_stuff': False
               }
-
-    carpark = Carpark(config)
+    car_park = CarPark(config)
     print("Carpark initialized")
