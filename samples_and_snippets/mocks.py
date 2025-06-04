@@ -15,10 +15,10 @@ class MockCarparkManager(CarparkSensorListener,CarparkDataProvider):
     def current_time(self):
         return time.time()
 
-    def incoming_car(self):
+    def incoming_car(self,license_plate):
         print('Car in!')
 
-    def outgoing_car(self):
+    def outgoing_car(self,license_plate):
         print('Car out!')
 
     def temperature_reading(self,reading):
