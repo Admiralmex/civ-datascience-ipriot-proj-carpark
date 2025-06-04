@@ -3,16 +3,18 @@ If you have a Raspberry Pi, or a SenseHAT emulator under Debian, you do not need
 
 You need to split the classes here into two files, one for the CarParkDisplay and one for the CarDetector.
 Attend to the TODOs in each class to complete the implementation."""
-import random
+from interfaces import CarparkSensorListener
+from interfaces import CarparkDataProvider
 import threading
 import time
 import tkinter as tk
 from typing import Iterable
+#TODO: replace this module with yours
+import mocks
 
 # ------------------------------------------------------------------------------------#
-# You don't need to understand how to implement this class, just how to use it.       #
+# You don't need to understand how to implement this class.                           #
 # ------------------------------------------------------------------------------------#
-# TODO: got to the main section of this script **first** and run the CarParkDisplay.  #
 
 
 class WindowedDisplay:
@@ -22,7 +24,7 @@ class WindowedDisplay:
     DISPLAY_INIT = '– – –'
     SEP = ':'  # field name separator
 
-    def __init__(self, title: str, display_fields: Iterable[str]):
+    def __init__(self, root, title: str, display_fields: Iterable[str]):
         """Creates a Windowed (tkinter) display to replace sense_hat display. To show the display (blocking) call .show() on the returned object.
 
         Parameters
@@ -32,7 +34,7 @@ class WindowedDisplay:
         display_fields : Iterable
             An iterable (usually a list) of field names for the UI. Updates to values must be presented in a dictionary with these values as keys.
         """
-        self.window = tk.Tk()
+        self.window = tk.Toplevel(root)
         self.window.title(f'{title}: Parking')
         self.window.geometry('800x400')
         self.window.resizable(False, False)
@@ -55,7 +57,7 @@ class WindowedDisplay:
 
     def show(self):
         """Display the GUI. Blocking call."""
-        self.window.mainloop()
+#        self.window.mainloop()
 
     def update(self, updated_values: dict):
         """Update the values displayed in the GUI. Expects a dictionary with keys matching the field names passed to the constructor."""
@@ -70,39 +72,51 @@ class WindowedDisplay:
 # TODO: STUDENT IMPLEMENTATION STARTS HERE #
 # -----------------------------------------#
 
-
 class CarParkDisplay:
     """Provides a simple display of the car park status. This is a skeleton only. The class is designed to be customizable without requiring and understanding of tkinter or threading."""
     # determines what fields appear in the UI
     fields = ['Available bays', 'Temperature', 'At']
 
-    def __init__(self):
-        self.window = WindowedDisplay(
+    def __init__(self,root):
+        self.window = WindowedDisplay(root,
             'Moondalup', CarParkDisplay.fields)
         updater = threading.Thread(target=self.check_updates)
         updater.daemon = True
         updater.start()
         self.window.show()
+        self._provider=None
+    
+    @property
+    def data_provider(self):
+        return self._provider
+    @data_provider.setter
+    def data_provider(self,provider):
+        if isinstance(provider,CarparkDataProvider):
+            self._provider=provider
+
+    def update_display(self):
+        field_values = dict(zip(CarParkDisplay.fields, [
+            f'{self._provider.available_spaces:03d}',
+            f'{self._provider.temperature:02d}℃',
+            self._provider.current_time.strftime("%H:%M:%S")
+        ]))
+        self.window.update(field_values)
 
     def check_updates(self):
-        # TODO: This is where you should manage the MQTT subscription
         while True:
-            # NOTE: Dictionary keys *must* be the same as the class fields
-            field_values = dict(zip(CarParkDisplay.fields, [
-                f'{random.randint(0, 150):03d}',
-                f'{random.randint(0, 45):02d}℃',
-                time.strftime("%H:%M:%S")]))
-            # Pretending to wait on updates from MQTT
-            time.sleep(random.randint(1, 10))
+            # TODO: This timer is pretty janky! Can you provide some kind of signal from your code
+            # to update the display?
+            time.sleep(1)
             # When you get an update, refresh the display.
-            self.window.update(field_values)
+            if self._provider is not None:
+                self.update_display()
 
 
-class CarDetector:
+class CarDetectorWindow:
     """Provides a couple of simple buttons that can be used to represent a sensor detecting a car. This is a skeleton only."""
 
-    def __init__(self):
-        self.root = tk.Tk()
+    def __init__(self,root):
+        self.root=root
         self.root.title("Car Detector ULTRA")
 
         self.btn_incoming_car = tk.Button(
@@ -111,21 +125,49 @@ class CarDetector:
         self.btn_outgoing_car = tk.Button(
             self.root, text='Outgoing Car 🚘',  font=('Arial', 50), cursor='bottom_left_corner', command=self.outgoing_car)
         self.btn_outgoing_car.pack(padx=10, pady=5)
+        self.listeners=list()
+        self.temp_label=tk.Label(
+            self.root, text="Temperature", font=('Arial', 20)
+        )
+        self.temp_label.pack(padx=10, pady=5,side='left')
+        self.temp_var=tk.StringVar()
+        self.temp_var.trace_add("write",lambda x,y,v: self.temperature_changed(float(self.temp_var.get())))
+        self.temp_box=tk.Entry(
+            self.root,font=('Arial', 20),textvariable=self.temp_var
+        )
+        self.temp_box.pack(padx=10, pady=5,side='right')
 
-        self.root.mainloop()
+    def add_listener(self,listener):
+        if isinstance(listener,CarparkSensorListener):
+            self.listeners.append(listener)
 
     def incoming_car(self):
-        # TODO: implement this method to publish the detection via MQTT
-        print("Car goes in")
+#        print("Car goes in")
+        for listener in self.listeners:
+            listener.incoming_car()
 
     def outgoing_car(self):
-        # TODO: implement this method to publish the detection via MQTT
-        print("Car goes out")
+#        print("Car goes out")
+        for listener in self.listeners:
+            listener.outgoing_car()
+
+    def temperature_changed(self,temp):
+        for listener in self.listeners:
+            listener.temperature_reading(temp)
 
 
 if __name__ == '__main__':
-    # TODO: Run each of these classes in a separate terminal. You should see the CarParkDisplay update when you click the buttons in the CarDetector.
-    # These classes are not designed to be used in the same module - they are both blocking. If you uncomment one, comment-out the other.
+    root = tk.Tk()
 
-    CarParkDisplay()
-    # CarDetector()
+    #TODO: This is my dodgy mockup. Replace it with a good one!
+    mock=mocks.MockCarparkManager()
+
+    display=CarParkDisplay(root)
+    #TODO: Set the display to use your data source
+    display.data_provider=mock
+
+    detector=CarDetectorWindow(root)
+    #TODO: Attach your event listener
+    detector.add_listener(mock)
+
+    root.mainloop()
