@@ -98,7 +98,7 @@ class CarParkDisplay:
         field_values = dict(zip(CarParkDisplay.fields, [
             f'{self._provider.available_spaces:03d}',
             f'{self._provider.temperature:02d}℃',
-            self._provider.current_time.strftime("%H:%M:%S")
+            time.strftime("%H:%M:%S",self._provider.current_time)
         ]))
         self.window.update(field_values)
 

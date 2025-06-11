@@ -13,7 +13,7 @@ class MockCarparkManager(CarparkSensorListener,CarparkDataProvider):
 
     @property
     def current_time(self):
-        return time.time()
+        return time.localtime()
 
     def incoming_car(self,license_plate):
         print('Car in!')
