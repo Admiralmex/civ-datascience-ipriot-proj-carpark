@@ -155,15 +155,15 @@ class CarDetectorWindow:
         if isinstance(listener,CarparkSensorListener):
             self.listeners.append(listener)
 
-    def incoming_car(self,license_plate):
+    def incoming_car(self):
 #        print("Car goes in")
         for listener in self.listeners:
-            listener.incoming_car(license_plate)
+            listener.incoming_car(self.current_license)
 
-    def outgoing_car(self,license_plate):
+    def outgoing_car(self):
 #        print("Car goes out")
         for listener in self.listeners:
-            listener.outgoing_car(license_plate)
+            listener.outgoing_car(self.current_license)
 
     def temperature_changed(self,temp):
         for listener in self.listeners:
