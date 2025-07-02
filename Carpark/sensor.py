@@ -20,4 +20,3 @@ class Sensor:
             "timestamp": datetime.now().isoformat()
         }
         self.client.publish(self.topic, json.dumps(payload))
-

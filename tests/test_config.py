@@ -2,8 +2,7 @@ import unittest
 
 import tomli  # you can use toml, json,yaml, or ryo for your config file
 
-import smartpark.parse_config as pc
-
+from smartpark import parse_config as pc
 
 class TestConfigParsing(unittest.TestCase):
     def test_parse_config_has_correct_location_and_spaces(self):
