@@ -1,0 +1,8 @@
+[parking_lot]
+location = "City Central"
+total_spaces = 50
+broker_host = "localhost"
+broker_port = 1883
+sensor_topic = "sensor"
+carpark_topic = "carpark"
+log_file = "log.txt"
